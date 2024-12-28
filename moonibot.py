@@ -17,7 +17,7 @@ TARGET_CHANNEL_NAME = "mods-review-submissions"
 async def on_ready():
     await bot.tree.sync()  # Sync the commands with Discord
     print(f"Logged in as {bot.user} and ready to serve!")
-    print("Successfully finished startup!")
+    print(f"Successfully finished startup!")
 
 @bot.tree.command(name="submit_video", description="Submit a video link to the bot")
 async def submit_video(interaction: discord.Interaction):
