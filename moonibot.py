@@ -2,72 +2,104 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-# Set up the bot
+# Replace with your bot token
+TOKEN = 'MTMyMjY2NzA4NTEzNzk2OTMwMw.GwJWJK.hHlHLC_NvJSynY24n5aM3pz-4cjg9Lmvbg5iIo'
+
+# Replace with your server ID and channel ID
+SERVER_ID = 1321149043732381778  # Replace with current server ID
+CHANNEL_ID = 91321249693920923648  # Replace with current channel ID
+
+class Moonibot(commands.Bot):
+    def __init__(self, *, command_prefix, intents):
+        super().__init__(command_prefix=command_prefix, intents=intents)
+
+    async def setup_hook(self) -> None:
+        # Sync the commands to the server
+        guild = discord.Object(id=SERVER_ID)
+        self.tree.copy_global_to(guild=guild)
+        await self.tree.sync(guild=guild)
+        await bot.tree.sync()
+
+# Initialize the bot with the necessary intents
 intents = discord.Intents.default()
-intents.messages = True
-intents.dm_messages = True
-intents.guilds = True
+intents.message_content = True
+bot = Moonibot(command_prefix='/', intents=intents)
 
-bot = commands.Bot(command_prefix="!", intents=intents)
+#Creates a dm with the user
 
-# Replace with the name of your target channel
-TARGET_CHANNEL_NAME = "mods-review-submissions"
+@bot.tree.command(name="dm", description="Create a direct message with the bot.")
+@app_commands.guild_only()
+async def dm(interaction: discord.Interaction):
+    await interaction.response.send_message("Check your DMs!", ephemeral=True)
+    await interaction.user.send("Hello! This is a DM from Moonibot. How can I help you?")
 
-@bot.event
-async def on_ready():
-    await bot.tree.sync()  # Sync the commands with Discord
-    print(f"Logged in as {bot.user} and ready to serve!")
-    print(f"Successfully finished startup!")
+# Help command
+@bot.tree.command(name="help", description="Get help on using the bot.")
+@app_commands.guild_only()
+async def help(interaction: discord.Interaction):
+    if not isinstance(interaction.channel, discord.DMChannel):
+        await interaction.response.send_message("This command can only be used in DMs.", ephemeral=True)
+        return
 
-@bot.tree.command(name="submit_video", description="Submit a video link to the bot")
-async def submit_video(interaction: discord.Interaction):
+    help_message = """
+    **Moonibot Help**
+
+    **/help**: Displays this help message.
+    **/send_link**: Sends a link to a specific channel.
+    **/send_video**: Sends a video to a specific channel.
+
+    **Note:** All commands must be used in DMs with the bot.
     """
-    Slash command that asks the user for a video link and posts it in a specific channel.
-    """
+    await interaction.response.send_message(help_message, ephemeral=True)
+
+# Send link command with modal
+@bot.tree.command(name="send_link", description="Send a link to a specific channel.")
+@app_commands.guild_only()
+async def send_link(interaction: discord.Interaction):
+    if not isinstance(interaction.channel, discord.DMChannel):
+        await interaction.response.send_message("This command can only be used in DMs.", ephemeral=True)
+        return
+
+    class LinkModal(discord.ui.Modal, title='Submit a Link'):
+        link = discord.ui.TextInput(
+            label='Link',
+            placeholder='Enter your link here',
+            style=discord.TextStyle.short,
+        )
+
+        async def on_submit(self, interaction: discord.Interaction):
+            channel = bot.get_channel(CHANNEL_ID)
+            await channel.send(self.link.value)
+            await interaction.response.send_message(f"Link sent to {channel.mention}!", ephemeral=True)
+
+    await interaction.response.send_modal(LinkModal())
+
+# Send video command
+@bot.tree.command(name="send_video", description="Send a video to a specific channel.")
+@app_commands.guild_only()
+async def send_video(interaction: discord.Interaction):
+    if not isinstance(interaction.channel, discord.DMChannel):
+        await interaction.response.send_message("This command can only be used in DMs.", ephemeral=True)
+        return
+
+    await interaction.response.send_message("Please send the video file.", ephemeral=True)
+
+    def check(message):
+        return message.author == interaction.user and message.channel == interaction.channel and message.attachments
+
     try:
-        # Send DM to the user to collect the link
-        await interaction.response.send_message("Check your DMs to submit your video link!", ephemeral=True)
-        
-        user = interaction.user
-        dm_channel = await user.create_dm()
-        await dm_channel.send("Hi! Please reply with the link to the video you'd like to submit.")
+        message = await bot.wait_for('message', check=check, timeout=60)
+    except TimeoutError:
+        await interaction.followup.send("You didn't send a video in time.", ephemeral=True)
+        return
 
-        # Define a check for the message response
-        def check(m):
-            return m.author == user and m.guild is None
+    if message.attachments:
+        file = message.attachments[0]
+        channel = bot.get_channel(CHANNEL_ID)
+        await channel.send(file=await file.to_file())
+        await interaction.followup.send(f"Video sent to {channel.mention}!", ephemeral=True)
+    else:
+        await interaction.followup.send("No video file found.", ephemeral=True)
 
-        # Wait for the user's response
-        msg = await bot.wait_for('message', check=check, timeout=120)  # 2 minutes to respond
-
-        # Get the target channel
-        guild = interaction.guild
-        target_channel = discord.utils.get(guild.text_channels, name=TARGET_CHANNEL_NAME)
-
-        if target_channel:
-            # Post the video link in the target channel
-            await target_channel.send(f"New video submission from {user.name}: {msg.content}")
-            await dm_channel.send("Your video has been sent! Thank you!")
-        else:
-            await dm_channel.send(f"Sorry, I couldn't find the channel `{TARGET_CHANNEL_NAME}`.")
-    except discord.Forbidden:
-        await interaction.response.send_message("I couldn't send you a DM. Please check your DM settings.", ephemeral=True)
-    except discord.HTTPException as e:
-        await interaction.response.send_message(f"An error occurred: {e}", ephemeral=True)
-    except discord.errors.TimeoutError:
-        await user.send("You didn't respond in time. Please try again using the `/submit_video` command.")
-
-@bot.tree.command(name="help", description="Get help with Moonibot commands")
-async def help_command(interaction: discord.Interaction):
-    """
-    Slash command to provide help information about Moonibot.
-    """
-    await interaction.response.send_message("Check your DMs for help!", ephemeral=True)
-    user = interaction.user
-    dm_channel = await user.create_dm()
-    await dm_channel.send("Here are the commands you can use:\n\n"
-                          "/submit_video - Submit a video.\n"
-                          "/help - Get help with commands.\n\n"
-                          "Feel free to reach out for support!")
-
-# Run the bot with your token
+# Run the bot
 bot.run("MTMyMjY2NzA4NTEzNzk2OTMwMw.GwJWJK.hHlHLC_NvJSynY24n5aM3pz-4cjg9Lmvbg5iIo")
