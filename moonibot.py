@@ -3,11 +3,27 @@ from discord import app_commands
 from discord.ext import commands
 
 # Replace with your bot token
-TOKEN = 'MTMyMjY2NzA4NTEzNzk2OTMwMw.GwJWJK.hHlHLC_NvJSynY24n5aM3pz-4cjg9Lmvbg5iIo'
+TOKEN = "MTMyMjY2NzA4NTEzNzk2OTMwMw.GwJWJK.hHlHLC_NvJSynY24n5aM3pz-4cjg9Lmvbg5iIo"
 
 # Replace with your server ID and channel ID
 SERVER_ID = 1321149043732381778  # Replace with current server ID
 CHANNEL_ID = 91321249693920923648  # Replace with current channel ID
+
+# Initialize the bot with the necessary intents
+intents = discord.Intents.default()
+intents.message_content = True
+class Moonibot(commands.Bot):
+    def __init__(self, *, command_prefix, intents):
+        super().__init__(command_prefix=command_prefix, intents=intents)
+
+    async def setup_hook(self) -> None:
+        # Sync the commands to the server
+        guild = discord.Object(id=SERVER_ID)
+        self.tree.copy_global_to(guild=guild)
+        await self.tree.sync(guild=guild)
+        await bot.tree.sync()
+
+bot = Moonibot(command_prefix='/', intents=intents)
 
 class Moonibot(commands.Bot):
     def __init__(self, *, command_prefix, intents):
@@ -20,10 +36,13 @@ class Moonibot(commands.Bot):
         await self.tree.sync(guild=guild)
         await bot.tree.sync()
 
-# Initialize the bot with the necessary intents
-intents = discord.Intents.default()
-intents.message_content = True
-bot = Moonibot(command_prefix='/', intents=intents)
+
+# Output to the console that the bot is ready
+@bot.event
+async def on_ready():
+    print(f'Logged in as {bot.user} (ID: {bot.user.id})')
+    print("Successfully started up.")
+    print('------')
 
 #Creates a dm with the user
 
@@ -34,8 +53,9 @@ async def dm(interaction: discord.Interaction):
     await interaction.user.send("Hello! This is a DM from Moonibot. How can I help you?")
 
 # Help command
+async def help(ctx):
 @bot.tree.command(name="help", description="Get help on using the bot.")
-@app_commands.guild_only()
+@app_commands.command()
 async def help(interaction: discord.Interaction):
     if not isinstance(interaction.channel, discord.DMChannel):
         await interaction.response.send_message("This command can only be used in DMs.", ephemeral=True)
@@ -50,11 +70,11 @@ async def help(interaction: discord.Interaction):
 
     **Note:** All commands must be used in DMs with the bot.
     """
-    await interaction.response.send_message(help_message, ephemeral=True)
+    await interaction.response.send_message(help_message, ephemeral=False)
 
 # Send link command with modal
 @bot.tree.command(name="send_link", description="Send a link to a specific channel.")
-@app_commands.guild_only()
+@app_commands.command()
 async def send_link(interaction: discord.Interaction):
     if not isinstance(interaction.channel, discord.DMChannel):
         await interaction.response.send_message("This command can only be used in DMs.", ephemeral=True)
@@ -76,7 +96,7 @@ async def send_link(interaction: discord.Interaction):
 
 # Send video command
 @bot.tree.command(name="send_video", description="Send a video to a specific channel.")
-@app_commands.guild_only()
+@app_commands.command()
 async def send_video(interaction: discord.Interaction):
     if not isinstance(interaction.channel, discord.DMChannel):
         await interaction.response.send_message("This command can only be used in DMs.", ephemeral=True)
