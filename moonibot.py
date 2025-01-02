@@ -53,7 +53,6 @@ async def dm(interaction: discord.Interaction):
     await interaction.user.send("Hello! This is a DM from Moonibot. How can I help you?")
 
 # Help command
-async def help(ctx):
 @bot.tree.command(name="help", description="Get help on using the bot.")
 @app_commands.command()
 async def help(interaction: discord.Interaction):
