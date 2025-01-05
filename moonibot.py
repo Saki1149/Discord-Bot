@@ -28,29 +28,27 @@ async def my_help(interaction: discord.Interaction):
         "/dm - Sends you a direct message."
     , ephemeral=True)
 
-@bot.tree.command(name="send_video", description="Sends the attached video to the target channel.")
+@bot.tree.command(name="send_video", description="Sends the video to the target channel (DM only).")
 @commands.dm_only()
-async def send_video(interaction: discord.Interaction):
-    """Sends the attached video to the target channel."""
+async def send_video(interaction: discord.Interaction, video: discord.Attachment):
+    """Sends the video to the target channel (DM only)."""
     try:
-        if interaction.attachments:  # Use interaction.attachments
-            attachment = interaction.attachments[0]
-            if attachment.content_type.startswith("video"):
-                target_channel = bot.get_channel(TARGET_CHANNEL_ID)
-                
-                embed = discord.Embed(title="Video Submission", description=f"Sent by {interaction.user.mention}")
-                embed.set_footer(text=f"Filename: {attachment.filename}")
-                await target_channel.send(embed=embed, file=await attachment.to_file())
-                
-                await interaction.response.send_message("Video sent successfully!")
-            else:
-                await interaction.response.send_message("Please attach a video file.")
-        else:
-            await interaction.response.send_message("No video attached.")
+        if not video.content_type.startswith("video"):
+            return await interaction.response.send_message("Please provide a video file.", ephemeral=True)
+
+        target_channel = bot.get_channel(TARGET_CHANNEL_ID)
+        
+        embed = discord.Embed(title="Video Submission", description=f"Sent by {interaction.user.mention}")
+        embed.set_footer(text=f"Filename: {video.filename}")
+        await target_channel.send(embed=embed, file=await video.to_file())
+        
+        await interaction.response.send_message("Video sent successfully!", ephemeral=True)
+
     except discord.HTTPException as e:
-        await interaction.response.send_message(f"An error occurred: {e}")
+        await interaction.response.send_message(f"An error occurred: {e}", ephemeral=True)
     except Exception as e:
-        await interaction.response.send_message(f"An unexpected error occurred: {e}")
+        print(f"An unexpected error occurred: {e}")
+        await interaction.response.send_message("An unexpected error occurred. Please try again later.", ephemeral=True)
 
 @bot.tree.command(name="send_link", description="Sends the link to the target channel.") # Register slash command
 @commands.dm_only()  # Restrict command to DMs
