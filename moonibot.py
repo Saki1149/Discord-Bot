@@ -1,8 +1,8 @@
 import discord
 from discord.ext import commands
 import os
+import openai   # Importing OpenAI for future use
 
-# Replace 'YOUR_BOT_TOKEN' with your actual bot token
 # TOKEN = os.getenv('DISCORD_TOKEN')
 
 # Replace with your desired channel ID
@@ -22,13 +22,13 @@ async def my_help(interaction: discord.Interaction):
     """Shows this help message."""
     await interaction.response.send_message(
         "**Commands (use in DMs):**\n"
-        "/send_video - Sends the attached video to the target channel.\n"
-        "/send_link <link> - Sends the link to the target channel.\n"
+        "/send_video - Sends the attached video to the mods review channel.\n"
+        "/send_link <link> - Sends the link to the mods review channel.\n"
         "**Commands (use anywhere):**\n"
         "/dm - Sends you a direct message."
     , ephemeral=True)
 
-@bot.tree.command(name="send_video", description="Sends the video to the target channel (DM only).")
+@bot.tree.command(name="send_video", description="Sends the video to the mods review channel (DM only).")
 @commands.dm_only()
 async def send_video(interaction: discord.Interaction, video: discord.Attachment):
     """Sends the video to the target channel (DM only)."""
