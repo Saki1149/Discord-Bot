@@ -2,6 +2,9 @@ import discord
 from discord.ext import commands
 import os
 import openai   # Importing OpenAI for future use
+from sens import TARGET_CHANNEL_ID
+from sens import APPROVED_CHANNEL_ID
+from sens import token
 
 # TOKEN = os.getenv('DISCORD_TOKEN')
 
@@ -96,4 +99,4 @@ async def dm(interaction: discord.Interaction):
     await user.send("'Ello, I'm mooni bot! I can help you send videos and links to mooni's channel. Use the /help command to see the available commands.")
     await interaction.response.send_message("I've sent you a DM", ephemeral=True) 
 
-bot.run("MTMyMjY2NzA4NTEzNzk2OTMwMw.GDssWN.01pfcZJvKTMLiqoKfInMdcLnNSRkr56wrbtrqk")
+bot.run(token)
