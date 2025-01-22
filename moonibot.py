@@ -6,8 +6,8 @@ import openai   # Importing OpenAI for future use
 # TOKEN = os.getenv('DISCORD_TOKEN')
 
 # Replace with Mooni's channel IDs
-TARGET_CHANNEL_ID = 1321249693920923648 #Mods review channel
-APPROVED_CHANNEL_ID = 1321172131173765191 #Channel for approved submissions
+TARGET_CHANNEL_ID = 1331673497662918676 #Mods review channel
+APPROVED_CHANNEL_ID = 11331673533834727445 #Channel for approved submissions
 
 # Emoji for reactions
 EMOJI_APPROVE = "✅"
