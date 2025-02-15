@@ -24,7 +24,7 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 async def on_ready():
     print(f'{bot.user} has connected to Discord!')
     await bot.tree.sync()  # Sync the commands
-    print("successfully finished startup!")
+    print("successfully finished startup")
 
 @bot.tree.command(name="help", description="Shows the help message.")  # Renamed to avoid conflict
 async def my_help(interaction: discord.Interaction):
