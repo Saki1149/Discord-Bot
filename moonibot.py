@@ -99,4 +99,10 @@ async def dm(interaction: discord.Interaction):
     await user.send("'Ello, I'm mooni bot! I can help you send videos and links to mooni's channel. Use the /help command to see the available commands.")
     await interaction.response.send_message("I've sent you a DM", ephemeral=True) 
 
+@bot.tree.command(name="Egg Theory", description="Tells you about the egg theory.")
+@commands.dm_only()  # Restrict command to DMs
+async def egg_theory(interaction: discord.Interaction):
+    """Tells you about the egg theory."""
+    await interaction.response.send_message("HAVE YOU HEARD OF THE EGG THEORY?? IF EVERY HUMAN COULD LAY EGGS, WE WOULD NEVER HAVE TO GO HUNGRY AGAIN! WE COULD EAT OUR OWN EGGS AND BE HAPPY AND IF YOU FEEL THAT IS A CANNIBALISM, YOU CAN JUST TRADE EGGS WITH A FRIEND TO NOT DO A BAD MORAL!")
+
 bot.run(token)
